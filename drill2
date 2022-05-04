@@ -32,13 +32,9 @@ const char name = 'a';
 const char square_root = 's';
 const char power_ = 'p';
 const char constant = 'c';
-const char declkey = '#';
 
 const string prompt = "> ";
 const string result = "= ";
-const string squareroot = "sqrt";
-const string power = "pow";
-const string quit_ = "exit";
 
 Token Token_stream::get()
 {
@@ -155,93 +151,57 @@ bool is_declared(string s)
 		return false;
 }
 
-double define_name (string var, double val)
-{
-	if(is_declared(var))
-		error(var, "declared twice");
-	var_table.push_back(Variable{var,val});
-	return val;
-}
-
 Token_stream ts;
 
 double expression();
 
-double get_pow(double a, int b)
-{
-    if (b == 0) 
-    {
-        if (a == 0) 
-        	return 0;    
-        return 1;                   
-    }
-    double d = a;              
-    for (int i = 2; i<=b; ++i)
-        d *= a;
-    return d;
-}
-
 double primary()
 {
 	Token t = ts.get();
-	switch (t.kind)
-	{
-		case '(':
-		{	
-			double d = expression();
-			t = ts.get();
-			if (t.kind != ')')
-				error("')' expected");
-			return d;
-		}
-		case '-':
-			return -primary();
-		case number:
-			return t.value;
-		case square_root:
-		{	
-			t =ts.get();
-        		if (t.kind != '(') 
-        			error("'(' expected");
-			
-        		double d = expression();
-        		if (d < 0) 
-					error("get the square root of a nefative number is imposible!");
-			
-        		t = ts.get();
-        		if (t.kind != ')')
-					error("')' expected");
-			
-        		return sqrt(d);
-		}
-		case power_:
-    		{   
-    			t = ts.get();
-        		if (t.kind != '(')
-        			error("'(' expected");
-        		double d = expression();
-        		
-        		t = ts.get();
-        		if (t.kind != ',')
-        			error("',' expected");
-        			
-        		t = ts.get();
-        		if (t.kind != number)
-        			error("second argument of 'pow' is not a number");
-        			
-        		int i = int(t.value);
-        		if (i != t.value)
-        			error("second argument of 'pow' is not an integer");
-        			
-        		t = ts.get();
-        		if (t.kind != ')') error("')' expected");
-				
-        		return get_pow(d,i);
-    		}
-		default:
-			error("primary expected");
+	switch (t.kind) {
+	case '(':
+	{	double d = expression();
+		t = ts.get();
+		if (t.kind != ')') error("')' expected");
+		//added below line
+		return d;
 	}
-	return -1;
+	case sq:
+	{
+		t = ts.get();	// get the '(' 
+		if (t.kind != '(') error("'(' expected");
+		double d = sqrt(expression());
+		if (isnan(d)) error("negative sqrt computed");
+		t = ts.get();
+		if (t.kind != ')') error("')' expected");
+		return d;
+	}
+	case pwr:
+	{
+		t = ts.get();
+		if (t.kind != '(') error("'(' expected");
+
+		double d = expression();
+		t = ts.get();
+		if (t.kind != ',') error("',' expected");
+
+		int m = narrow_cast<int>(expression());
+		d = pow(d,m);
+
+		t = ts.get();
+		if (t.kind != ')') error("')' expected");
+		
+		return d;
+	}
+	case '-':
+		return - primary();
+	case number:
+		return t.value;
+	case name:
+		return get_value(t.name);
+	default:
+		error("primary expected");
+	}
 }
 
 double term()
