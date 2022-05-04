@@ -1,0 +1,107 @@
+/*  Task:
+    1. 
+*/
+
+#include "../std_lib_facilities.h"
+
+class Token
+{	
+	public:
+		char kind;
+		double value;
+		string name;
+		// three constructors
+		Token(char ch) :kind(ch), value(0) {}
+		Token(char ch, double val) :kind(ch), value(val) {}
+		Token(char ch, string n) : kind(ch), name(n) {}
+};
+
+//Symbolic constants
+const char let = 'L';
+const char quit = 'Q';
+const char print = ';';
+const char number = '8';
+const char name = 'a';
+const char sq = 's';
+const char pwr = 'p';
+const char constant = 'c';
+
+Token Token_stream::get()
+{
+	if (full) 
+  { 
+      full = false;
+      return buffer;
+   }
+   char ch;
+	 cin >> ch;
+   switch (ch)
+	{
+		case '(':
+		case ')':
+		case '+':
+		case '-':
+		case '*':
+		case '/':
+		case '%':
+		case ';':
+		case '=':
+		case ',':
+			return Token(ch);
+		case '.':
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+    {cin.unget();
+		double val;
+		cin >> val;
+		return Token(number, val);
+	}
+
+
+
+
+
+void calculate() // expression evaluation loop
+{
+	while (true) try {
+		cout << prompt;
+		Token t = ts.get();
+		while (t.kind == print) 
+			t = ts.get();
+		if (t.kind == quit) 
+			return;
+		ts.unget(t);
+		cout << result << statement() << endl;
+	}
+	catch (runtime_error& e) {
+		cerr << e.what() << endl;
+		clean_up_mess();
+	}
+}
+
+int main()
+
+try {
+	calculate();
+	return 0;
+}
+catch (exception& e) {
+	cerr << "exception: " << e.what() << endl;
+	char c;
+	while (cin >> c && c != ';');
+	return 1;
+}
+catch (...) {
+	cerr << "exception\n";
+	char c;
+	while (cin >> c && c != ';');
+	return 2;
+}
