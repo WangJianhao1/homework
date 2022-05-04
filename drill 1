@@ -1,10 +1,4 @@
-*task: 1. The character of the exit command is changed from q to x.
- 2. The characters of the print command are from; To = 
-3. Add a greeting line in main(): 
-4. Improve that greeting by mentioning which operators are available and how to print and exit. */ 
 #include "../std_lib_facilities.h"
-
-//------------------------------------------------------------------------------
 
 class Token
 {
