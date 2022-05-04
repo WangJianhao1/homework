@@ -1,7 +1,3 @@
-/*task: 
- 1. The characters of the print command are from; To = 
-2. Add a greeting line in main(): 
-3. Improve that greeting by mentioning which operators are available and how to print and exit. */ 
 #include "../std_lib_facilities.h"
 
 //------------------------------------------------------------------------------
