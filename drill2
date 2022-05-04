@@ -9,11 +9,22 @@ class Token
 	public:
 		char kind;
 		double value;
-		string name;
-		// three constructors
+		string name;// three constructors
 		Token(char ch) :kind(ch), value(0) {}
 		Token(char ch, double val) :kind(ch), value(val) {}
 		Token(char ch, string n) : kind(ch), name(n) {}
+};
+
+class Token_stream 
+{
+	public:
+		Token_stream();full(0), buffer(0) { }
+		Token get();
+		void putback(Token t);{ buffer = t; full = true; }
+		void ignore(char); // discard characters up to and including a char
+	private:
+		bool full;
+		Token buffer;
 };
 
 //Symbolic constants
@@ -22,9 +33,16 @@ const char quit = 'Q';
 const char print = ';';
 const char number = '8';
 const char name = 'a';
-const char sq = 's';
-const char pwr = 'p';
+const char square_root = 's';
+const char power_ = 'p';
 const char constant = 'c';
+const char declkey = '#';
+
+const string prompt = "> ";
+const string result = "= ";
+const string squareroot = "sqrt";
+const string power = "pow";
+const string quit_ = "exit";
 
 Token Token_stream::get()
 {
@@ -59,15 +77,265 @@ Token Token_stream::get()
 		case '7':
 		case '8':
 		case '9':
-    {cin.unget();
+	{
+		cin.putback(ch);
 		double val;
 		cin >> val;
 		return Token(number, val);
 	}
+	case '#':
+		return Token(let);
+	default:
+		if (isalpha(ch))
+		{
+			string s;
+			s += ch;
+			while (cin.get(ch) && (isalpha(ch) || isdigit(ch))) 
+				s += ch;
+			cin.putback(ch);
+			
+			if (s == squareroot)
+				return Token(square_root);
+			if (s == power)
+				return Token(power_);
+			if (s == "const") 
+				return Token(constant);
+			if (s == "quit") 
+				return Token(name);
+			return Token(name,s);
+		}
+			error("Bad token");
+	}
+}
+
+void Token_stream::ignore(char c)
+{
+	if (full && c == buffer.kind) {
+		full = false;
+		return;
+	}
+	full = false;
+
+	char ch=0;
+	while (cin >> ch)
+		if (ch == c) return;
+}
+
+class Variable
+{
+	public:
+		string name;
+		double value;
+		Variable(string n, double v) :name(n), value(v) {}
+};
+
+vector<Variable> var_table;
+
+double get_value(string s)
+{
+	for (int i = 0; i < var_table.size(); ++i)
+		if (var_table[i].name == s)
+			return var_table[i].value;
+	error("get: undefined name ", s);
+	return -1;
+}
+
+void set_value(string s, double d)
+{
+	for (int i = 0; i < var_table.size(); ++i)
+		if (var_table[i].name == s) 
+		{
+			var_table[i].value = d;
+			return;
+		}
+	error("set: undefined name ", s);
+}
+
+bool is_declared(string s)
+{
+	for (int i = 0; i < var_table.size(); ++i)
+		if (var_table[i].name == s) 
+			return true;
+		return false;
+}
+
+double define_name (string var, double val)
+{
+	if(is_declared(var))
+		error(var, "declared twice");
+	var_table.push_back(Variable{var,val});
+	return val;
+}
+
+Token_stream ts;
+
+double expression();
+
+double get_pow(double a, int b)
+{
+    if (b == 0) 
+    {
+        if (a == 0) 
+        	return 0;    
+        return 1;                   
+    }
+    double d = a;              
+    for (int i = 2; i<=b; ++i)
+        d *= a;
+    return d;
+}
+
+double primary()
+{
+	Token t = ts.get();
+	switch (t.kind)
+	{
+		case '(':
+		{	
+			double d = expression();
+			t = ts.get();
+			if (t.kind != ')')
+				error("')' expected");
+			return d;
+		}
+		case '-':
+			return -primary();
+		case number:
+			return t.value;
+		case square_root:
+		{	
+			t =ts.get();
+        		if (t.kind != '(') 
+        			error("'(' expected");
+			
+        		double d = expression();
+        		if (d < 0) 
+					error("get the square root of a nefative number is imposible!");
+			
+        		t = ts.get();
+        		if (t.kind != ')')
+					error("')' expected");
+			
+        		return sqrt(d);
+		}
+		case power_:
+    		{   
+    			t = ts.get();
+        		if (t.kind != '(')
+        			error("'(' expected");
+        		double d = expression();
+        		
+        		t = ts.get();
+        		if (t.kind != ',')
+        			error("',' expected");
+        			
+        		t = ts.get();
+        		if (t.kind != number)
+        			error("second argument of 'pow' is not a number");
+        			
+        		int i = int(t.value);
+        		if (i != t.value)
+        			error("second argument of 'pow' is not an integer");
+        			
+        		t = ts.get();
+        		if (t.kind != ')') error("')' expected");
+				
+        		return get_pow(d,i);
+    		}
+		default:
+			error("primary expected");
+	}
+	return -1;
+}
+
+double term()
+{
+	double left = primary();
+	Token t = ts.get();
+	while (true) 
+	{
+		switch (t.kind)
+		{
+			case '*':
+				left *= primary();
+				t = ts.get();
+				break;
+			case '/':
+			{	
+				double d = primary();
+				if (d == 0) error("divide by zero");
+					left /= d;
+					t = ts.get();
+					break;
+			}
+			default:
+				ts.putback(t);
+				return left;
+		}
+	}
+}
+
+double expression()
+{
+	double left = term();
+	Token t = ts.get();
+	while (true) 
+	{
+		switch (t.kind) 
+		{
+			case '+':
+				left += term();
+				t = ts.get();
+				break;
+			case '-':
+				left -= term();
+				t = ts.get();
+				break;
+			default:
+				ts.putback(t);
+				return left;
+		}
+	}
+}
+
+double declaration()
+{
+	Token t = ts.get();
+	if (t.kind != name) 
+		error("name expected in declaration");
+	
+	string var_name = t.name;
+	
+	Token t2 = ts.get();
+	if (t2.kind != '=') 
+		error("= missing in declaration of ", name);
+	
+	double d = expression();
+	define_name(var_name, d);
+	return d;
+}
 
 
 
+double statement()
+{
+	Token t = ts.get();
+	switch(t.kind) {
+	case let:
+		return declaration();
+	case constant:
+		return declare_const();
+	default:
+		ts.unget(t);
+		return expression();
+	}
+}
 
+void clean_up_mess()
+{
+	ts.ignore(print);
+	
+}
 
 void calculate() // expression evaluation loop
 {
