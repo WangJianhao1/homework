@@ -52,8 +52,8 @@ Token Token_stream::get()
 
     switch (ch)
     {
-        case 'x':    // for "quit"
-        case '=':    // for "print"
+        case 'x':    // for "quit"，q was replaced by x
+        case '=':    // for "print"，; was replaced by =
         case '(': 
         case ')': 
         case '+': 
@@ -77,10 +77,10 @@ Token Token_stream::get()
 }
 
 
-Token_stream ts;        // provides get() and putback() 
+Token_stream ts;      
 
 
-double expression();    // declaration so that primary() can call expression()
+double expression();    
 
 
 // deal with numbers and parentheses
@@ -110,7 +110,7 @@ double primary()
 double term()
 {
     double left = primary();
-    Token t = ts.get();        // get the next token from token stream
+    Token t = ts.get();        
     while (true) 
     {   
         switch (t.kind) 
@@ -129,7 +129,7 @@ double term()
             	break;
             }
         	default:    
-            	ts.putback(t);     // put t back into the token stream
+            	ts.putback(t);     
             	return left;
         }
     }
@@ -137,30 +137,30 @@ double term()
 // deal with + and -
 double expression()
 {
-    double left = term();      // read and evaluate a Term
-    Token t = ts.get();        // get the next token from token stream
+    double left = term();      
+    Token t = ts.get();        
     while (true)
     {
         switch (t.kind) 
         {
             case '+':
-                left += term();    // evaluate Term and add
+                left += term();   
                 t = ts.get();
                 break;
             case '-':
-                left -= term();    // evaluate Term and subtract
+                left -= term();    
                 t = ts.get();
                 break;
             default:
-                ts.putback(t);     // put t back into the token stream
-                return left;       // finally: no more + or -: return the answer
+                ts.putback(t);     
+                return left;      
         }
     }
 }
 
 int main()
 {
-	cout << "Welcome to simple calculator." << endl;
+	cout << "Welcome to simple calculator." << endl;		 // greeting line in main
 	cout << "Please enter numbers to be calculated." << endl;
 	cout << enter 'x' to leave, or enter '=' to result!”  << endl;
 try
