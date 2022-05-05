@@ -1,5 +1,5 @@
 #include "../std_lib_facilities.h"
-
+//1:int year month day
 struct Date 
 {
     int y; // year
@@ -9,8 +9,8 @@ struct Date
 
 void init_day(Date& dd, int y, int m, int d)
 {
-    // check that (y,m,d) is a valid date
-    // if it is, use it to initialize dd
+ // 2:check that (y,m,d) is a valid date
+ //   if it is, use it to initialize dd
     if (y > 0)
         dd.y = y;
     else
@@ -29,7 +29,7 @@ void init_day(Date& dd, int y, int m, int d)
 
 void add_day(Date& date, int n)
 {
-    // increase dd by n days
+//3: increase dd by n days
     date.d += n;
 	if (date.d > 31) 
 	{
@@ -46,19 +46,20 @@ void add_day(Date& date, int n)
 int main()
 try
 {
-    //Date variable ( named object)
+//4: Date variable ( named object)
     Date today;
     Date tomorrow;
-    
-    init_day(today, 1978, 6, 25);  // set today to 1978.6.25
-    
-    tomorrow = today;       // copy today to tomorrow
-    add_day(tomorrow, 1);   //add 1 day to tomorrow
+//5: set today to 1978.6.25
+//  copy today to tomorrow
+//  add 1 day to tomorrow
+    init_day(today, 1978, 6, 25);  
+    tomorrow = today;
+    add_day(tomorrow, 1);
     
     cout << "today: " << today.y << "." << today.m << "." << today.d << "."<< endl;  
     cout << "tomorrow: " << tomorrow.y << "." << tomorrow.m << "." << tomorrow.d << "."<< endl;  
     
-    //invalid date to check
+//6: invalid date to check
     Date x;
     init_day(x, -2, 13, 32);
     cout << x.y << "." << x.m << "." << x.d << endl;
