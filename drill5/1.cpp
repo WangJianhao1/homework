@@ -136,7 +136,7 @@ try
     print_array(cout,p2,10);
     cout << endl;
 
-// 21: Repeat 10–12 using a vector rather than an array.
+// 21: Repeat 18–20 using a vector rather than an array.
     cout << "task 21: \n";
     vector<int> vec1;
     for (int i = 0; i<10; ++i)
