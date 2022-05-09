@@ -1,4 +1,4 @@
-#include "../std_lib_facilities.h"
+#include "std_lib_facilities.h"
 
 // 1:Write a function print_array10(ostream& os, int* a) that prints out the values of a (assumed to have ten elements) to os.
 void print_array10(ostream& os, int* a)
