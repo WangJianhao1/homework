@@ -3,7 +3,7 @@
 class Token
 {
     public:
-        char kind;        // what kind of token
+        char kind;        // what kind of token 
         double value;     // for numbers: a value 
         Token (char ch) 
 	:kind(ch), value(0) {}  // make a Token from a char
